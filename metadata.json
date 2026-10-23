@@ -1,0 +1,8 @@
+{
+  "name": "Remix سيشن حسام كينو للتصوير",
+  "description": "تطبيق ويب متكامل لاستوديو حسام كينو للتصوير الفوتوغرافي الفاخر، مع معرض صور تفاعلي، حجز مباشر عبر واتساب، ألبومات عملاء خاصة برقم سري، ولوحة تحكم شاملة للأدمن.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
