@@ -49,9 +49,14 @@ function writeDb(data: Record<string, unknown>) {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '50mb' }));
+
+  // Healthcheck endpoint for Cloud Run / load balancers
+  app.get('/api/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', uptime: process.uptime() });
+  });
 
   // API: Get persistent studio state
   app.get('/api/studio-state', (_req, res) => {
@@ -69,7 +74,11 @@ async function startServer() {
     res.json({ ok: true, updatedAt: saved?.updatedAt || Date.now() });
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    (process.env.NODE_ENV !== 'development' && fs.existsSync(path.join(__dirname, 'dist', 'index.html')));
+
+  if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -83,8 +92,15 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Hossam Keno Studio Server running on http://0.0.0.0:${PORT}`);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, closing server');
+    server.close(() => {
+      process.exit(0);
+    });
   });
 }
 
